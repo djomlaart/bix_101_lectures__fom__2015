@@ -1,0 +1,298 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Week 5 python code hints and reminders.\n",
+    "\n",
+    "This cell contains some hints and tips that may (or may not be) useful for completing the exercises. You should try to get used to exploiting the iPyhton Notebook tab completion (or shift+tab in function call parentheses) help system as much as possible, and not rely on these cells to give you the syntax and option highlights.\n",
+    "****\n",
+    "\n",
+    "### pysam.Fasta file reminder:\n",
+    "\n",
+    "```python    \n",
+    "import pysam\n",
+    "\n",
+    "fasta = pysam.Fastafile(file_path)\n",
+    "fasta.references # sequence names\n",
+    "fasta.lengths # length of each sequence\n",
+    "fasta.fetch(sequence_name, [start, [stop]]) #fetch a sequence  \n",
+    "```  \n",
+    "\n",
+    "****\n",
+    "### Maniplating lists and strings (small part of the standard library):\n",
+    "#### Length and slices\n",
+    "```python\n",
+    "len(my_object) #get the length of list or string\n",
+    "my_list[0:10], my_list[0:], my_list[:10] # list slicing\n",
+    "my_list[:-3], my_list[0:10:4], my_list[::4] # more slicing\n",
+    "```\n",
+    "#### Iterating over lists\n",
+    "```python\n",
+    "for x in my_list:  # iterating over a list\n",
+    "    do stuff\n",
+    "    \n",
+    "for x in my_list[0:10]:  # iterating over first 10 elements of a list\n",
+    "    do stuff\n",
+    "    \n",
+    "for x in my_list[:-5]:  # iterating over a list up to last 5 elements\n",
+    "    do stuff\n",
+    "```  \n",
+    "    \n",
+    "#### Iterating over a list with an index (you may need to access next/previous element in the list)\n",
+    "```python\n",
+    "for i, x in enumerate(my_list):  #enumerate adds a counter\n",
+    "    do stuff\n",
+    "```  \n",
+    "You could also do, but please don't:\n",
+    "```python\n",
+    "for i in range(len(my_list)):\n",
+    "    x = my_list[i]\n",
+    "```\n",
+    "\n",
+    "#### List comprahensions\n",
+    "```python\n",
+    "my_list2 = [f(x) for x in my_list] # List comprahension, a very fast way to make a new list by applying a function to each element of an existing list\n",
+    "\n",
+    "my_list2 = [f(x) for x in my_list if condition(x)] # You can add a filter to a comprahension\n",
+    "```\n",
+    "So:\n",
+    "```python\n",
+    "my_list2 = [x for x in my_string if x in 'ABC'] # This fill filter a string to only 'A', 'B', or 'C', characters eg. DAAVC -> AAC\n",
+    "```\n",
+    "***\n",
+    "\n",
+    "### Working with Python dicts\n",
+    "Python dict is just essentially a very simple hash table. You can use dicts for the kmer counting task.\n",
+    "```python\n",
+    "my_dict = {} #create an empty dict\n",
+    "my_dict[key] = value #add key, value pair to dict\n",
+    "value = my_dict[key] #get the value for the key, error if none\n",
+    "value = my_dict.get(key, defualt), #get the value for the key, default if none\n",
+    "```\n",
+    "\n",
+    "### pybedtools.BedTool reminder:\n",
+    "\n",
+    "```python    \n",
+    "from pybedtools import BedTool\n",
+    "bed = BedTool('file_path.bed')\n",
+    "\n",
+    "bed.count() # Count the number features in this BedTool.\n",
+    "\n",
+    "for region in bed: # Iterate over all of the regions\n",
+    "    do something\n",
+    "``` "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Week 5 Exercise 1: Exploring a small fasta file\n",
+    "\n",
+    "In this exercise you will work with a small fasta file, in order to get acquainted with the fasta format, as well as with the pysam Fastafile interface.\n",
+    "\n",
+    "- The example FASTA file is found under **data/example_reference.fasta**\n",
+    "- View the contents of the file\n",
+    "    - You can use less file, or !less file in the Notebook to invoke less\n",
+    "- Create a pysam Fastafile parser\n",
+    "- Get and print sequence names\n",
+    "    - How many sequences are there?\n",
+    "- Fetch the entire firts sequence\n",
+    "    - How long is it?\n",
+    "    - Print the first 100 bases"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "!less ../data/example_reference.fasta"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import pysam\n",
+    "fasta = pysam.FastaFile('../data/example_reference.fasta')\n",
+    "print fasta.references\n",
+    "print len(fasta.fetch('20'))\n",
+    "print fasta.fetch('20')[0:99]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Week 5 Exercise 2: Exploring HG38 genome\n",
+    "\n",
+    "In this exercise you will work with with the full hg38 human genome fasta.\n",
+    "\n",
+    "- Full hg38 FASTA file is located under in **data/GRCh38.fasta**\n",
+    "- Create a pysam Fastafile parser\n",
+    "- Get sequence names for all contigs\n",
+    "    - How many contigs are there?\n",
+    "    - How long is chromosome 5?\n",
+    "- Fetch section chromosome 17:43044295-43125370\n",
+    "    - What is the *GC content* of this region? (percent of G and C bases)\n",
+    "    - What is the most common *3-mer*?\n",
+    "- Does the following sequence appear in chromosome 1?\n",
+    "    - Look at string.find(string) function \n",
+    "\n",
+    "```python \n",
+    "TAAAAATACAAAAAATTAGCCAGGTGTGGTGCAGGCGCCTGGAGTCCCAGCTCCTCAGGAGGTTGAAGCAGGAGAGTTGCTTGAACTGGTGAGGTGGAGGTTGCAGTGAGCTGAGATCGTGCCACTGCACTCCAGCCTGGGCGACAGAGCGAGACTCCATCTCAAAAAAAAGAAAAAAGAAAACCTACAAAGTAGAAGACAATCACAGCACATAACCCAGAATTTTACTGTCAAGACCATGTAAGGAATATCCATGAATGGATAAAGACAGACAGCCCCACAGCAAAATGGGCAAAAGACGTCAACAGGCACTTCACAGTTAAGGACGTGCCACGTCCCCTAACACGCGCATGGGTTCGGAGGACCAGGACATGGGTTTTTTGGGGAAGGGGGAGATCATCCTGCCTATGGCACCCTCTGGCTCTGCGATTCCTCTCCCAGGAGCACACCCTACAGAAAATCCCACCTGTTGTGTTAGCTTCCCGGGGTCGCCATAACAA\n",
+    "```\n",
+    "\n",
+    "- Fetch base at chromosome 1:248755121\n",
+    "    - What is the base?\n",
+    "    - Fetch and print region at chromosome 1:5000-5100\n",
+    "    - What is the base composition?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "fasta = pysam.FastaFile('../data/GRCh38.fasta')\n",
+    "print len(fasta.references)\n",
+    "print fasta.lengths[4]\n",
+    "\n",
+    "region = pysam.Fastafile('../data/GRCh38.fasta').fetch('chr17', 43044295, 43125370)\n",
+    "print 'GC:', len([x for x in region if x in 'GC']) / float(len(region))\n",
+    "\n",
+    "counts = dict()\n",
+    "for i, x in enumerate(region[:-3]):\n",
+    "    counts[region[i:i+3]] = counts.get(region[i:i+3], 0)+1\n",
+    "print 'Most common:', {v:k for k,v in counts.iteritems()}[max({v:k for k,v in counts.iteritems()}.keys())] \n",
+    "\n",
+    "seq = 'TAAAAATACAAAAAATTAGCCAGGTGTGGTGCAGGCGCCTGGAGTCCCAGCTCCTCAGGAGGTTGAAGCAGGAGAGTTGCTTGAACTGGTGAGGTGGAGGTTGCAGT' +\\\n",
+    "'GAGCTGAGATCGTGCCACTGCACTCCAGCCTGGGCGACAGAGCGAGACTCCATCTCAAAAAAAAGAAAAAAGAAAACCTACAAAGTAGAAGACAATCACAGCACATAACCCA'+\\\n",
+    "'GAATTTTACTGTCAAGACCATGTAAGGAATATCCATGAATGGATAAAGACAGACAGCCCCACAGCAAAATGGGCAAAAGACGTCAACAGGCACTTCACAGTTAAGGACGTGC'+\\\n",
+    "'CACGTCCCCTAACACGCGCATGGGTTCGGAGGACCAGGACATGGGTTTTTTGGGGAAGGGGGAGATCATCCTGCCTATGGCACCCTCTGGCTCTGCGATTCCTCTCCCAGGA'+\\\n",
+    "'GCACACCCTACAGAAAATCCCACCTGTTGTGTTAGCTTCCCGGGGTCGCCATAACAA'\n",
+    "print fasta.fetch('chr1').find(seq)\n",
+    "\n",
+    "print pysam.Fastafile('../data/GRCh38.fasta').fetch('chr1', 248755121, 248755122)\n",
+    "print pysam.Fastafile('../data/GRCh38.fasta').fetch('chr1', 5000, 5100)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Week 5 Exercise 3: Exercise: PyBedTools\n",
+    "\n",
+    "- Create a BedTool from the file (exome.b37.bed)\n",
+    "    - This BED files is from an actual exome capture kit!\n",
+    "- How many regions are present in the BED file?\n",
+    "    - Print out the few regions from this BED files \n",
+    "    - **CAREFUL! Printing the whole BED file WILL kill your Notebook!**\n",
+    "    - Which BED fields are present?\n",
+    "- Place all regions whose name contains ‘BRCA1’\n",
+    "    - In python you can do: if ‘a’ in ‘string’\n",
+    "    - Use a list comprehension for the task [x for x in iterator]\n",
+    "    - How many regions are there\n",
+    "- What does BedTool.merge() function do? (shift+tab for help is your friend)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "from pybedtools import BedTool\n",
+    "bed = BedTool('../data/exome.bed')\n",
+    "for i, x in enumerate(bed):\n",
+    "    if i < 5:\n",
+    "        print x,\n",
+    "        \n",
+    "print len([x for x in BedTool('../data/exome.bed') if 'BRCA1' in x[3]])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Setup\n",
+    "\n",
+    "1. Anaconda https://www.continuum.io/downloads\n",
+    "2. Jupiter notebook http://jupyter.org (Should be included in Anaconda, no need for manual install, jusr run)\n",
+    "3. pysam http://pysam.readthedocs.org/en/latest/\n",
+    "4. BedTools http://bedtools.readthedocs.org/en/latest/\n",
+    "5. samtools https://samtools.github.io\n",
+    "6. tabix http://www.htslib.org/doc/tabix.html\n",
+    "7. pybedtools https://pythonhosted.org/pybedtools/\n",
+    "8. IGV https://www.broadinstitute.org/igv/\n",
+    "9. BWA http://bio-bwa.sourceforge.net\n",
+    "10. Picard http://broadinstitute.github.io/picard/\n",
+    "11. GATK https://www.broadinstitute.org/gatk/download/ (bez Queue-a)\n",
+    "12. SSW https://github.com/mengyao/Complete-Striped-Smith-Waterman-Library\n",
+    "(pratiti instrukcije za instalaciju python wrappera ssw_wrap.py)\n",
+    "\n",
+    "\n",
+    "### Files\n",
+    "Grch38 genome fasta file:   ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCA_000001405.20_GRCh38.p5/GCA_000001405.20_GRCh38.p5_genomic.fna.gz  \n",
+    "Grch37 genome fasta file (optional for local use)  \n",
+    "ftp://ftp.ncbi.nlm.nih.gov/1000genomes/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz  \n",
+    "\n",
+    "example_reference.fasta http://tinyurl.com/p465kn6  \n",
+    "exome.bed http://tinyurl.com/qzcwucn\n",
+    "\n",
+    "For weeks 6 and 7:  \n",
+    "example_human_Illumina.pe_1.fastq http://tinyurl.com/p7meo4p  \n",
+    "example_human_Illumina.pe_2.fastq http://tinyurl.com/ob26zbh  \n",
+    "example_human_known_indels.vcf http://tinyurl.com/ouzx2tz  \n",
+    "example_human_known_snp.vcf http://tinyurl.com/oxq3nwd  \n",
+    "WES_human_Illumina.bam http://tinyurl.com/q66z9m2  \n",
+    "WES_human_Illumina.bam.bai http://tinyurl.com/pu95ase"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
