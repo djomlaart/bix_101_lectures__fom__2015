@@ -1,0 +1,175 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exericse 1  \n",
+    "In this exercise you will be implementing a simple aligner. You will use to to align the following read:\n",
+    "'ACATACACATGTCCTGTTTTGATGTCCTATAATTAATTTTCTCTCCGTTTTTAACTTTTATCTATCTTATTAATGT'  \n",
+    "to the refernece sequence located in the file: ../data/example_reference.fasta (contig '20')\n",
+    "\n",
+    "## Seed phase\n",
+    "- Implement a simple hash-based aligner in Python\n",
+    "    - A dict can be used to create the index\n",
+    "    - Create an index for each kmer in a sequence\n",
+    "    - Create this index for the example fasta file \n",
+    "        (in the data directory, used in Week 5)  \n",
+    "          \n",
+    "          \n",
+    "- To map a read, find locations for each kmer in the read\n",
+    "    - Mind the offset from the beginning of the read\n",
+    "    - Find the region with most kmers mapping to it\n",
+    "    \n",
+    "- collections.Counter() may be useful (pass a list to Counter(), and it will return the number of times each element occurs in the list)\n",
+    "\n",
+    "## Extend phase\n",
+    "- A fast Smith-Waterman implementation is installed on the server.\n",
+    "(https://github.com/mengyao/Complete-Striped-Smith-Waterman-Library)\n",
+    "    - Use this tool to produce fine-grain alignments\n",
+    "- To import the tool:\n",
+    "```python\n",
+    "import sys\n",
+    "sys.path.append('/opt/Complete-Striped-Smith-Waterman-Library/src')\n",
+    "from ssw_wrap import Aligner\n",
+    "```\n",
+    "- An aligner object is created by passing a reference sequence to it: a=Aligner(sequence, report_cigar=True)\n",
+    "    - Pass report_cigar=True so that you also get cigar strings\n",
+    "    - You want to create a fine grain aligner out of the region found in seed phase, not the whole reference.\n",
+    "    (reference[a:b], where a and b are the start and end of the region you want to align to)\n",
+    "    - a.align(read) can be used to produce the alignment\n",
+    "   \n",
+    "- Try modifying the to see the effect (add insertions, deletions, and mismatches)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "collapsed": true
+   },
+   "source": [
+    "# Exercise 2\n",
+    "\n",
+    "In this exercise you will use BWA-MEM to align a pair of FASTQ files (../data/example_human_Illumina.pe_1.fastq,  ../data/example_human_Illumina.pe_2.fastq) against a small example FASTA file (../data/example_reference.fasta)\n",
+    "\n",
+    "- __Make a copy or a link to the FASTA file in your local folder!__\n",
+    "- BWA executable is located in /opt/bwa/bwa\n",
+    "    - Start BWA and see the options (Terminal, or !/opt/bwa/bwa)\n",
+    "- Check out bwa index command, and use it to index __your local copy__ of the FASTA file\n",
+    "- Check out bwa mem command\n",
+    "- Use bwa mem to align the example fastq files, and __forward bwa output to a file in your local folder!__  \n",
+    "(bwa command > example_human_Illumina.sam) \n",
+    "- Inspect the produced output (less example_human_Illumina.sam)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exercise 3\n",
+    "\n",
+    "In this exercise you will convert the SAM file you produced in Exercise 2 into a BAM file, sort, and index the BAM\n",
+    "\n",
+    "- samtools is installed on the server\n",
+    "- Run and inspect the samtools command\n",
+    "- Run and inspect the samtools view command\n",
+    "- samtools view -Sb in.sam > out.bam converts a SAM to a BAM\n",
+    "    - Use this command to convert the SAM file from Exercise 2 into a BAM\n",
+    "    - __Forward the output to a BAM file in your local folder!__\n",
+    "- Run and inspect the samtools sort command\n",
+    "- Sort the BAM file you created\n",
+    "    - __Forward the output to a new BAM file in your local folder!__\n",
+    "- Run and inspect the samtools index command\n",
+    "- Index the sorted BAM file you created"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exercise 5\n",
+    "\n",
+    "[Pysam](http://pysam.readthedocs.org/en/latest/) is a python module that makes it easy to read and manipulate mapped short read sequence data stored in SAM/BAM files. This page provides a quick introduction in using pysam followed by the API. See [Working with BAM/SAM-formatted files](http://pysam.readthedocs.org/en/latest/usage.html#usage) for more detailed usage instructions. \n",
+    "\n",
+    "To use the module to read a file in BAM format, create a [AlignmentFile](http://pysam.readthedocs.org/en/latest/api.html#pysam.AlignmentFile) object:  \n",
+    "\n",
+    "```python\n",
+    "import pysam\n",
+    "samfile = pysam.AlignmentFile(\"ex1.bam\", \"rb\")\n",
+    "```\n",
+    "Once a file is opened you can iterate over all of the reads:  \n",
+    "```python\n",
+    "for x in samfile:\n",
+    "    print x\n",
+    "```\n",
+    "(__DO NOT ACTUALLY CALL THIS FOR LOOP WITH THE PRINT STATEMENT IN THE BODY, UNLESS YOU HAVE A VERY SMALL BAM FILE, THE NOTEBOOK WILL CRASH! If you want to print, you can add a break to the loop body to run a single iteration)__  \n",
+    "\n",
+    "Or you can over the reads mapping to a specified region using fetch(). Each iteration returns a [AlignedSegment](http://pysam.readthedocs.org/en/latest/api.html#pysam.AlignedSegment) object which represents a single read along with its fields and optional tags:\n",
+    "```python\n",
+    "for x in samfile.fetch('chr1', 100, 120):\n",
+    "    print x\n",
+    "```\n",
+    "\n",
+    "- Create an AlignmentFile object using file: ../data/WES_human_Illumina.bam\n",
+    "- Take the first read from the AlignmentFile\n",
+    "- Inspect the fields in the AlignedSegment\n",
+    "- How many unmapped reads are there in the file?\n",
+    "- Create a BedTool with the exome.bed from the ../data folder\n",
+    "    - Get the regions from the BedTool that cover BRCA1 gene\n",
+    "    - Fetch all of the reads from the BAM file mapped to BRCA1\n",
+    "\n",
+    "Reminder:\n",
+    "``` python\n",
+    "from pybedtools import BedTool\n",
+    "bed = BedTool('../data/exome.bed')\n",
+    "\n",
+    "for x in bed:\n",
+    "    ...\n",
+    "```\n",
+    "BedTool iterates over Interval objects, x[3] holds the name of the gene. x[0] holds the chromosome as a Unicode.  \n",
+    "__You'll need to cast it to str before passing to pysam__.  \n",
+    "x[1] and x[2] hold the cooridnates, which you'll neet to cast to int before passing to pysam.\n",
+    "\n",
+    "Optional hint:  \n",
+    "itertools.chain holds a from_iterable which can be used to easily append iterators/lists:\n",
+    "```python\n",
+    "from itertools import chain\n",
+    "\n",
+    "list_of_lists = [[1,2], [3,4], [5,6]]\n",
+    "print list(chain.from_iterable(list_of_lists))\n",
+    "[1, 2, 3, 4, 5, 6]\n",
+    "```"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}

@@ -1,0 +1,345 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exercise 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 83,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import pysam\n",
+    "import sys\n",
+    "sys.path.append('/opt/Complete-Striped-Smith-Waterman-Library/src')\n",
+    "from ssw_wrap import Aligner\n",
+    "from collections import Counter\n",
+    "from itertools import chain"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "fasta = pysam.FastaFile(\"../data/example_reference.fasta\").fetch('20')\n",
+    "read = 'ACATACACATGTCCTGTTTTGATGTCCTATAATTAATTTTCTCTCCGTTTTTAACTTTTATCTATCTTATTAATGT'\n",
+    "k = 10"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 72,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "def create_index(fasta, k):\n",
+    "    kmers = {}\n",
+    "    for i, x in enumerate(fasta[:-k]):\n",
+    "        kmer = fasta[i:i+k]\n",
+    "        if kmer not in kmers:\n",
+    "            kmers[kmer] = []\n",
+    "        kmers[kmer].append(i)\n",
+    "    return kmers\n",
+    "\n",
+    "def seed_read(index, k, read):\n",
+    "    return [[y-i for y in index.get(read[i:i+k], [])]]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'fasta' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "\u001b[1;32m<ipython-input-5-994aac1dc46b>\u001b[0m in \u001b[0;36m<module>\u001b[1;34m()\u001b[0m\n\u001b[1;32m----> 1\u001b[1;33m \u001b[0mindex\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0mcreate_index\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mfasta\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mk\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m      2\u001b[0m \u001b[0mcounts\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0mCounter\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mchain\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mfrom_iterable\u001b[0m\u001b[1;33m(\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mseed_read\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mindex\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mk\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mread\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m      3\u001b[0m \u001b[1;32mprint\u001b[0m \u001b[0msorted_counts\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m      4\u001b[0m \u001b[0msorted_counts\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0msorted\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mcounts\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0miteritems\u001b[0m\u001b[1;33m(\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mkey\u001b[0m\u001b[1;33m=\u001b[0m\u001b[1;32mlambda\u001b[0m \u001b[0mx\u001b[0m\u001b[1;33m:\u001b[0m \u001b[0mx\u001b[0m\u001b[1;33m[\u001b[0m\u001b[1;36m1\u001b[0m\u001b[1;33m]\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mreverse\u001b[0m\u001b[1;33m=\u001b[0m\u001b[0mTrue\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m      5\u001b[0m \u001b[1;32mprint\u001b[0m \u001b[0msorted_counts\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'fasta' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "index = create_index(fasta, k)\n",
+    "counts = Counter(chain.from_iterable((seed_read(index, k, read))))\n",
+    "sorted_counts = sorted(counts.iteritems(), key=lambda x: x[1], reverse=True)\n",
+    "seed_hit = sorted_counts[0][0]\n",
+    "\n",
+    "extender = Aligner(fasta[seed_hit:seed_hit+100], report_cigar=True)\n",
+    "extender.align(read)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exercise 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "!cp ../../data/example_reference.fasta ."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[bwa_index] Pack FASTA... 0.00 sec\r\n",
+      "[bwa_index] Construct BWT for the packed sequence...\r\n",
+      "[bwa_index] 0.00 seconds elapse.\r\n",
+      "[bwa_index] Update BWT... 0.00 sec\r\n",
+      "[bwa_index] Pack forward-only FASTA... 0.00 sec\r\n",
+      "[bwa_index] Construct SA from BWT and Occ... 0.00 sec\r\n",
+      "[main] Version: 0.7.12-r1044\r\n",
+      "[main] CMD: /opt/bwa/bwa index example_reference.fasta\r\n",
+      "[main] Real time: 0.024 sec; CPU: 0.008 sec\r\n"
+     ]
+    }
+   ],
+   "source": [
+    "!/opt/bwa/bwa index example_reference.fasta"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[M::bwa_idx_load_from_disk] read 0 ALT contigs\r\n",
+      "[M::process] read 344 sequences (26144 bp)...\r\n",
+      "[M::mem_pestat] # candidate unique pairs for (FF, FR, RF, RR): (0, 169, 0, 0)\r\n",
+      "[M::mem_pestat] skip orientation FF as there are not enough pairs\r\n",
+      "[M::mem_pestat] analyzing insert size distribution for orientation FR...\r\n",
+      "[M::mem_pestat] (25, 50, 75) percentile: (126, 160, 206)\r\n",
+      "[M::mem_pestat] low and high boundaries for computing mean and std.dev: (1, 366)\r\n",
+      "[M::mem_pestat] mean and std.dev: (167.81, 54.31)\r\n",
+      "[M::mem_pestat] low and high boundaries for proper pairs: (1, 446)\r\n",
+      "[M::mem_pestat] skip orientation RF as there are not enough pairs\r\n",
+      "[M::mem_pestat] skip orientation RR as there are not enough pairs\r\n",
+      "[M::mem_process_seqs] Processed 344 reads in 0.020 CPU sec, 0.021 real sec\r\n",
+      "[main] Version: 0.7.12-r1044\r\n",
+      "[main] CMD: /opt/bwa/bwa mem example_reference.fasta ../../data/example_human_Illumina.pe_1.fastq ../../data/example_human_Illumina.pe_2.fastq\r\n",
+      "[main] Real time: 0.028 sec; CPU: 0.023 sec\r\n"
+     ]
+    }
+   ],
+   "source": [
+    "!/opt/bwa/bwa mem example_reference.fasta ../../data/example_human_Illumina.pe_1.fastq ../../data/example_human_Illumina.pe_2.fastq > example_human_Illumina.sam"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "less example_human_Illumina.sam"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exercise 3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[samopen] SAM header is present: 1 sequences.\r\n"
+     ]
+    }
+   ],
+   "source": [
+    "!samtools view -bS example_human_Illumina.sam > example_human_Illumina.bam"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "!samtools sort example_human_Illumina.bam example_human_Illumina.sorted"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "!samtools index example_human_Illumina.sorted.bam"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exercise 5"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import pysam"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "bam = pysam.AlignmentFile('../../data/WES_human_Illumina.bam')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "SRR316957.804449\t163\t0\t10004\t0\t76M\t0\t10054\t76\tCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTA\tarray('B', [23, 28, 33, 28, 35, 21, 31, 14, 28, 27, 8, 17, 20, 20, 16, 14, 24, 14, 20, 17, 16, 23, 23, 24, 24, 33, 33, 31, 22, 31, 21, 30, 30, 29, 31, 33, 34, 22, 33, 27, 29, 25, 31, 32, 19, 27, 26, 25, 13, 10, 20, 22, 21, 17, 24, 29, 28, 31, 29, 25, 33, 31, 31, 33, 31, 27, 31, 19, 17, 25, 32, 32, 26, 34, 31, 29])\t[('NM', 0), ('MD', '76'), ('AS', 76), ('XS', 76), ('RG', '1')]\n"
+     ]
+    }
+   ],
+   "source": [
+    "for x in pysam.AlignmentFile('../../data/WES_human_Illumina.bam'):\n",
+    "    print x\n",
+    "    break"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "55137L"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bam.unmapped"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "from pybedtools import BedTool\n",
+    "import pybedtools\n",
+    "from itertools import chain"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "brca1 = [x for x in BedTool('../../data/exome.bed') if 'BRCA1' in x[3]]\n",
+    "list(chain.from_iterable(bam.fetch(str(x[0]), int(x[1]), int(x[2])) for x in brca1))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
